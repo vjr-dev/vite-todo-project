@@ -1,0 +1,51 @@
+db.sales.aggregate([
+    // Step 1: Unwind the items array
+    { $unwind: "$items" },
+
+    // Step 2: Project relevant fields and compute revenue for each item
+    {
+        $project: {
+            store: 1,
+            month: { $dateToString: { format: "%Y-%m", date: "$date" } },
+            revenue: { $multiply: ["$items.quantity", "$items.price"] },
+            price: "$items.price"
+        }
+    },
+
+    // Step 3: Group by store and month, calculate total revenue and average price
+    {
+        $group: {
+            _id: { store: "$store", month: "$month" },
+            totalRevenue: { $sum: "$revenue" },
+            averagePrice: { $avg: "$price" }
+        }
+    },
+
+    // Step 4: Reshape the output document
+    {
+        $project: {
+            store: "$_id.store",
+            month: "$_id.month",
+            totalRevenue: 1,
+            averagePrice: 1,
+            _id: 0
+        }
+    },
+
+    // Step 5: Sort the output by store and month in ascending order
+    {
+        $sort: { store: 1, month: 1 }
+    }
+]);
+
+
+//expected output
+
+[
+    {
+        "store": "Store A",
+        "month": "2024-06",
+        "totalRevenue": 230.0,
+        "averagePrice": 15.0
+    }
+]
