@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import AddTodo from "./AddTodo";
 import TodoList from "./TodoList";
 import Filter from "./Filter";
+import { FilterType, Todo } from "../types";
 
 const STORAGE_KEY = "todos";
 
